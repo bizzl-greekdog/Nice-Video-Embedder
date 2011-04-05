@@ -9,7 +9,13 @@ Author URI:
 License: LGPL3
 */
 
-load_plugin_textdomain('wordpress-video-plugin-helper', null, basename(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'locale');
+function init_l10n() {
+	$base = basename(dirname(__FILE__));
+	if (preg_match("#wp-content/plugins#", $base) == 0)
+			$base = 'wordpress-video-plugin-helper';
+	load_plugin_textdomain('wordpress-video-plugin-helper', null, $base . DIRECTORY_SEPARATOR . 'locale');
+}
+init_l10n();
 
 $fromvideoplatform_rules = array(
 	'#youtube\.com/watch\?.*v=(?P<ID>.{11})#i' => '[youtube %ID%]',
