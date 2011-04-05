@@ -9,6 +9,8 @@ Author URI:
 License: LGPL3
 */
 
+load_plugin_textdomain('wordpress-video-plugin-helper', null, basename(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'locale');
+
 $fromvideoplatform_rules = array(
 	'#youtube\.com/watch\?.*v=(?P<ID>.{11})#i' => '[youtube %ID%]',
 	'#vimeo\.com/(clip:)?(?P<ID>[0-9]+)#i' => '[vimeo %ID% %width% %height%]',
@@ -23,7 +25,7 @@ function nsprintf($subject, $arguments) {
 function fromvideoplatform_media_menu($tabs) {
 	if ($_REQUEST['type'] != 'video')
 		return $tabs;
-	$newtab = array('fromvideoplatform' => __('From Video Platform', 'fromvideoplatform'));
+	$newtab = array('fromvideoplatform' => __('From Video Platform', 'wordpress-video-plugin-helper'));
 	return array_merge($tabs, $newtab);
 }
 
@@ -37,26 +39,28 @@ function media_fromvideoplatgorm_process($preset) {
 	printf('<form enctype="multipart/form-data" method="post" action="%s" class="media-upload-form type-form validate" id="fromvideoplatform-form">', esc_attr($form_action_url));
 	printf('<input type="hidden" name="post_id" id="post_id" value="%s" />', $post_id);
 	wp_nonce_field('media-form');
-	printf('<h3 class="media-title">%s</h3>', __('Embed Video from Platform', 'fromvideoplatform'));
+	printf('<h3 class="media-title">%s</h3>', __('Embed Video from Platform', 'wordpress-video-plugin-helper'));
+	if ($preset)
+		echo '<div class="error">' . sprintf(__('<em>%s</em> belongs to no supported video platform'), $preset) . '</div>';
 	echo '
 	<div id="media-items">
 		<div class="media-item media-blank">
 			<table class="describe"><tbody>
 				<tr>
 					<th valign="top" scope="row" class="label">
-						<span class="alignleft"><label for="insertonly[href]">' . __('Video URL') . '</label></span>
+						<span class="alignleft"><label for="insertonly[href]">' . __('Video URL', 'wordpress-video-plugin-helper') . '</label></span>
 						<span class="alignright"><abbr title="required" class="required">*</abbr></span>
 					</th>
 					<td class="field"><input id="insertonly[href]" name="insertonly[href]" value="' . $preset . '" type="text" aria-required="true"></td>
 				</tr>
 				<tr>
 					<th valign="top" scope="row" class="label">
-						<span class="alignleft"><label for="insertonly[title]">' . __('Title') . '</label></span>
+						<span class="alignleft"><label for="insertonly[title]">' . __('Title', 'wordpress-video-plugin-helper') . '</label></span>
 						<span class="alignright"><abbr title="required" class="required">*</abbr></span>
 					</th>
 					<td class="field"><input id="insertonly[title]" name="insertonly[title]" value="" type="text" aria-required="true"></td>
 				</tr>
-				<tr><td></td><td class="help">' . __('Title text, e.g. &#8220;Lucy on YouTube&#8221;') . '</td></tr>
+				<tr><td></td><td class="help">' . __('Title text, e.g. &#8220;Lucy on YouTube&#8221;', 'wordpress-video-plugin-helper') . '</td></tr>
 			' . _insert_into_post_button('video') . '
 			</tbody></table>
 		</div>
