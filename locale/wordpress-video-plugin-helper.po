@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wordpress-video-plugin-helper 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-04-05 16:19+0200\n"
+"POT-Creation-Date: 2011-04-12 11:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,27 +17,27 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/main.php:28
+#: src/main.php:28 src/main.php:34
 msgid "From Video Platform"
 msgstr ""
 
-#: src/main.php:42
+#: src/main.php:42 src/main.php:48
 msgid "Embed Video from Platform"
 msgstr ""
 
-#: src/main.php:44
+#: src/main.php:44 src/main.php:50
 #, php-format
 msgid "<em>%s</em> belongs to no supported video platform"
 msgstr ""
 
-#: src/main.php:51
+#: src/main.php:51 src/main.php:57
 msgid "Video URL"
 msgstr ""
 
-#: src/main.php:58
+#: src/main.php:58 src/main.php:64
 msgid "Title"
 msgstr ""
 
-#: src/main.php:63
+#: src/main.php:63 src/main.php:69
 msgid "Title text, e.g. &#8220;Lucy on YouTube&#8221;"
 msgstr ""
