@@ -107,43 +107,83 @@ class Wordpress_Video_Plugin_Helper {
 		return array_merge($tabs, $newtab);
 	}
 
-	public static function media_process($preset) {
+	public static function media_process($url, $title) {
 		media_upload_header();
 		$post_id = intval($_REQUEST['post_id']);
 
 		$form_action_url = admin_url("media-upload.php?type=video&tab=fromvideoplatform&post_id=$post_id");
 		$form_action_url = apply_filters('media_upload_form_url', $form_action_url, $type);
 
-		printf('<form enctype="multipart/form-data" method="post" action="%s" class="media-upload-form type-form validate" id="fromvideoplatform-form">', esc_attr($form_action_url));
-		printf('<input type="hidden" name="post_id" id="post_id" value="%s" />', $post_id);
-		wp_nonce_field('media-form');
-		printf('<h3 class="media-title">%s</h3>', __('Embed Video from Platform', self::$domain));
-		if ($preset)
-			echo '<div class="error">' . sprintf(__('<em>%s</em> belongs to no supported video platform'), $preset) . '</div>';
-		echo '
-		<div id="media-items">
-			<div class="media-item media-blank">
-				<table class="describe"><tbody>
-					<tr>
-						<th valign="top" scope="row" class="label">
-							<span class="alignleft"><label for="insertonly[href]">' . __('Video URL', self::$domain) . '</label></span>
-							<span class="alignright"><abbr title="required" class="required">*</abbr></span>
-						</th>
-						<td class="field"><input id="insertonly[href]" name="insertonly[href]" value="' . $preset . '" type="text" aria-required="true"></td>
-					</tr>
-					<tr>
-						<th valign="top" scope="row" class="label">
-							<span class="alignleft"><label for="insertonly[title]">' . __('Title', self::$domain) . '</label></span>
-							<span class="alignright"><abbr title="required" class="required">*</abbr></span>
-						</th>
-						<td class="field"><input id="insertonly[title]" name="insertonly[title]" value="" type="text" aria-required="true"></td>
-					</tr>
-					<tr><td></td><td class="help">' . __('Title text, e.g. &#8220;Lucy on YouTube&#8221;', self::$domain) . '</td></tr>
-				' . _insert_into_post_button('video') . '
-				</tbody></table>
-			</div>
-		</div>
-	</form>';
+		$form = tag('form')->attr(array(
+			'enctype' => 'multipart/form-data',
+			'method' => 'post',
+			'action' => esc_attr($form_action_url),
+			'class' => 'media-upload-form type-form validate',
+			'id' => 'fromvideoplatform-form'
+		));
+		$form->append(tag('input')->attr(array(
+			'type' => 'hidden',
+			'name' => 'post_id',
+			'id' => 'post_id',
+			'value' => $post_id
+		)));
+		$form->append(wp_nonce_field('media-form'), tag('h3')->attr('class', 'media-title')->append(__('Embed Video from Platform', self::$domain)));
+
+		if ($url)
+			$form->attr('class', 'error')->append(sprintf(__('<em>%s</em> belongs to no supported video platform'), $url));
+		$form->append(
+			tag('div')->attr('id', 'media-items')->append(
+				tag('div')->attr('class', 'media-item media-blan')->append(
+					tag('table')->attr('class', 'describe')->append(
+						tag('tr')->append(
+							tag('th')->attr(array('valign' => 'top', 'scope' => 'row', 'class' => 'label'))->append(
+								tag('span')->attr('class', 'alignleft')->append(
+									tag('label')->attr('for', 'insertonly[href]')->append(__('Video URL', self::$domain))
+								),
+								tag('span')->attr('class', 'alignright')->append(
+									tag('abbr')->attr(array('title' => 'required', 'class' => 'required'))->append('*')
+								)
+							),
+							tag('td')->attr('class', 'field')->append(
+									tag('input')->attr(array(
+										'id' => 'insertonly[href]',
+										'name' => 'insertonly[href]',
+										'value' => $url,
+										'type' => 'text',
+										'aria-required' => 'true'
+									))
+							)
+						),
+						tag('tr')->append(
+							tag('th')->attr(array('valign' => 'top', 'scope' => 'row', 'class' => 'label'))->append(
+								tag('span')->attr('class', 'alignleft')->append(
+									tag('label')->attr('for', 'insertonly[title]')->append(__('Title', self::$domain))
+								),
+								tag('span')->attr('class', 'alignright')->append(
+									tag('abbr')->attr(array('title' => 'required', 'class' => 'required'))->append('')
+								)
+							),
+							tag('td')->attr('class', 'field')->append(
+									tag('input')->attr(array(
+										'id' => 'insertonly[title]',
+										'name' => 'insertonly[title]',
+										'value' => $title,
+										'type' => 'text',
+										'aria-required' => 'true'
+									))
+							)
+						),
+						tag('tr')->append(
+							tag('td')->append('&nbsp;'),
+							tag('td')->attr('class', 'help')->append(__('Title text, e.g. &#8220;Lucy on YouTube&#8221;', self::$domain))
+						)
+					)
+				)
+			)
+		);
+		$form->append(_insert_into_post_button('video'));
+
+		echo $form;
 	}
 
 	public static function menu_handle() {
@@ -151,8 +191,9 @@ class Wordpress_Video_Plugin_Helper {
 			$shortcode = '';
 			$matches = array();
 			$dimensions = array('width' => 400, 'height' => 300);
-			$title = $_POST['insertonly']['title'];
-			$href = $_POST['insertonly']['href'];
+			extract($_POST['insertonly']);
+//			$title = $_POST['insertonly']['title'];
+//			$href = $_POST['insertonly']['href'];
 
 			foreach (self::$rules as $key => $value) {
 				if (preg_match($key, $href, &$matches) > 0) {
@@ -162,7 +203,7 @@ class Wordpress_Video_Plugin_Helper {
 			}
 
 			if (!$shortcode)
-				return wp_iframe(array(__CLASS__, 'media_process'), $href);
+				return wp_iframe(array(__CLASS__, 'media_process'), $href, $title);
 
 			if ($title) {
 				$arguments = array_merge(array('title' => $title, 'content' => $shortcode), $dimensions);
@@ -171,7 +212,7 @@ class Wordpress_Video_Plugin_Helper {
 
 			return media_send_to_editor($shortcode);
 		} else {
-			return wp_iframe(array(__CLASS__, 'media_process'), '');
+			return wp_iframe(array(__CLASS__, 'media_process'), '', '');
 		}
 	}
 
