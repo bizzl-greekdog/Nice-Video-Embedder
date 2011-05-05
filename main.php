@@ -11,7 +11,8 @@ License: LGPL3
 
 if (!function_exists('join_path')) {
 	function join_path() {
-		return implode(DIRECTORY_SEPARATOR, func_get_args());
+		$fuck = func_get_args();
+		return implode(DIRECTORY_SEPARATOR, $fuck);
 	}
 }
 
