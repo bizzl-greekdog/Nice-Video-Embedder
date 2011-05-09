@@ -1,15 +1,15 @@
-# German translation of the Wordpress Video Plugin Helper.
+# German translation of the Nice Video Embedder.
 # Copyright (C) 2011 Benjamin Kleiner
-# This file is distributed under the same license as the wordpress-video-plugin-helper package.
+# This file is distributed under the same license as the nice-video-embedder package.
 # Benjamin Kleiner <bizzl@users.sourceforge.net>, 2011.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: wordpress-video-plugin-helper 1.0.0\n"
+"Project-Id-Version: nice-video-embedder 2.5.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-04-05 16:19+0200\n"
-"PO-Revision-Date: 2011-04-05 16:57+0200\n"
+"POT-Creation-Date: 2011-05-09 12:35+0200\n"
+"PO-Revision-Date: 2011-05-09 12:37+0200\n"
 "Last-Translator: Benjamin Kleiner <bizzl@users.sourceforge.net>\n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -17,27 +17,43 @@ msgstr ""
 "Content-Type: text/plain; charset=ascii\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/main.php:28
+#: src/main.php:28 src/main.php:34 src/main.php:59
 msgid "From Video Platform"
 msgstr "Von Videoplattform"
 
-#: src/main.php:42
+#: src/main.php:42 src/main.php:48 src/main.php:84
 msgid "Embed Video from Platform"
 msgstr "Video von Videoplattform einbetten"
 
-#: src/main.php:44
+#: src/main.php:44 src/main.php:50 src/main.php:87
 #, php-format
 msgid "<em>%s</em> belongs to no supported video platform"
 msgstr "<em>%s</em> geh&ouml;rt zu keiner bekannten Videoplattform"
 
-#: src/main.php:51
+#: src/main.php:51 src/main.php:57 src/main.php:95
 msgid "Video URL"
 msgstr "Video-URL"
 
-#: src/main.php:58
+#: src/main.php:58 src/main.php:64 src/main.php:114
 msgid "Title"
 msgstr "Titel"
 
-#: src/main.php:63
+#: src/main.php:63 src/main.php:69 src/main.php:132
 msgid "Title text, e.g. &#8220;Lucy on YouTube&#8221;"
 msgstr "Titeltext, zum Beispiel &#8220;Lucy auf YouTube&#8221;"
+
+#: src/main.php:137
+msgid "Size"
+msgstr "Gr&ouml;&szlig;e"
+
+#: src/main.php:152
+msgid " by "
+msgstr " mal "
+
+#: src/main.php:161
+msgid " Pixels"
+msgstr " Pixel"
+
+#: src/main.php:175
+msgid "Preview"
+msgstr "Vorschau"

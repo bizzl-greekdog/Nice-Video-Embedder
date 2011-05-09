@@ -60,7 +60,8 @@ class Nice_Video_Embedder {
 		return array_merge($tabs, $newtab);
 	}
 
-	public static function media_process($url, $title) {
+	public static function media_process($url, $title, $width = 400, $height = 300) {
+		wp_enqueue_script('jquery-ui-resizable');
 		media_upload_header();
 		$post_id = intval($_REQUEST['post_id']);
 
@@ -129,12 +130,75 @@ class Nice_Video_Embedder {
 						tag('tr')->append(
 							tag('td')->append('&nbsp;'),
 							tag('td')->attr('class', 'help')->append(__('Title text, e.g. &#8220;Lucy on YouTube&#8221;', self::$domain))
+						),
+						tag('tr')->append(
+							tag('th')->attr(array('valign' => 'top', 'scope' => 'row', 'class' => 'label'))->append(
+								tag('span')->attr('class', 'alignleft')->append(
+									tag('label')->attr('for', 'insertonly[width]')->append(__('Size', self::$domain))
+								),
+								tag('span')->attr('class', 'alignright')->append(
+									tag('abbr')->attr(array('title' => 'required', 'class' => 'required'))->append('*')
+								)
+							),
+							tag('td')->attr('class', 'field')->append(
+									tag('input')->attr(array(
+										'id' => 'insertonly-width',
+										'name' => 'insertonly[width]',
+										'value' => $width,
+										'style' => 'width: auto',
+										'type' => 'text',
+										'aria-required' => 'true'
+									)),
+									__(' by ', self::$domain),
+									tag('input')->attr(array(
+										'id' => 'insertonly-height',
+										'name' => 'insertonly[height]',
+										'value' => $height,
+										'style' => 'width: auto',
+										'type' => 'text',
+										'aria-required' => 'true'
+									)),
+									__(' Pixels', self::$domain)
+							)
+						),
+						tag('tr')->append(
+							tag('td')->attr('colspan', 2)->append(
+								tag('div')->attr(array(
+									'class' => 'error',
+									'id' => 'video-size-preview'
+								))->css(array(
+									'width' => $width,
+									'height' => $height,
+									'margin' => '0 auto',
+									'text-align' => 'center',
+									'overflow' => 'hidden'
+								))->append(tag('span')->css('vertical-align', 'middle')->append(__('Preview', self::$domain)))
+							)
 						)
 					)
 				)
 			)
 		);
 		$form->append(_insert_into_post_button('video'));
+		
+		$form->append(tag('script')->attr('type', 'text/javascript')->append(
+			"//<!--\n",
+'var $j = jQuery.noConflict();
+$j(function() {
+	$j("#insertonly-height, #insertonly-width").keyup(function(event) {
+		var h = parseInt($j("#insertonly-height").attr("value"));
+		var w = parseInt($j("#insertonly-width").attr("value"));
+		$j("#video-size-preview").height(h);
+		$j("#video-size-preview").width(w);
+	});
+	$j("#fromvideoplatform-form").submit(function(event) {
+		$j("#insertonly-height").attr("value", $j("#video-size-preview").height());
+		$j("#insertonly-width").attr("value", $j("#video-size-preview").width());
+		return true;
+	});
+});',
+			"\n//-->"
+		));
 
 		echo $form;
 	}
@@ -143,8 +207,8 @@ class Nice_Video_Embedder {
 		if ( !empty($_POST['insertonlybutton']) && !empty($_POST['insertonly']['href']) ) {
 			$shortcode = '';
 			$matches = array();
-			$dimensions = array('width' => 400, 'height' => 300);
 			extract($_POST['insertonly']);
+			$dimensions = array('width' => $width, 'height' => $height);
 //			$title = $_POST['insertonly']['title'];
 //			$href = $_POST['insertonly']['href'];
 

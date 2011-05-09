@@ -4,6 +4,16 @@ if (!function_exists('tag')) {
 		private $name = '';
 		private $attributes = array();
 		private $children = array();
+		private $style = array();
+		
+		private function parseCSS($input) {
+			$input = strpos($input, ';') > -1 ? explode($input, ';') : array($input);
+			foreach ($input as $entry) {
+				$m = explode(':', $entry, 2);
+				if ($m)
+					$this->style[trim($m[0])] = trim($m[1]);
+			}
+		}
 
 		public function __construct($tagName) {
 	//		parent::__construct();
@@ -16,7 +26,26 @@ if (!function_exists('tag')) {
 			elseif (is_array($name))
 				$this->attributes = array_merge($this->attributes, $name);
 			else
-				return $this->attributes[$name];
+				if ($value == 'style')
+					return clone $this->style;
+				else
+					return $this->attributes[$name];
+			if (isset($this->attributes['style'])) {
+				$this->parseCSS($this->attributes['style']);
+				unset($this->attributes['style']);
+			}
+			return $this;
+		}
+		
+		public function css($name, $value = NULL) {
+			if ($value !== NULL)
+				$this->style[$name] = $value;
+			elseif (is_array($name))
+				$this->style = array_merge($this->style, $name);
+			elseif (strpos($name, ':') > -1)
+				$this->parseCSS($name);
+			else
+				return $this->style[$name];
 			return $this;
 		}
 
@@ -34,7 +63,24 @@ if (!function_exists('tag')) {
 			$result = '<' . $this->name;
 			foreach ($this->attributes as $key => $value)
 					$result .= ' ' . $key . '="' . htmlentities2($value) . '"';
-
+			if (count($this->style)) {
+				$css = array();
+				foreach ($this->style as $key => $value) {
+					if (!$value)
+						continue;
+					if (is_int($value))
+						$value = "{$value}px";
+					elseif (is_float($value))
+						$value = "{$value}pt";
+					elseif (is_array($value))
+						$value = implode(' ', $value);
+					else
+						$value = strval($value);
+					array_push($css, "{$key}: {$value}");
+				}
+				$css = implode('; ', $css);
+				$result .= ' style="' . htmlentities2($css) . '"';
+			}
 			if (count($this->children)) {
 				$result .= '>';
 				foreach ($this->children as $child)
