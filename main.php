@@ -240,19 +240,28 @@ $j(function() {
 		$width = (isset($atts[2])) ? $atts[1] : 400;
 		$height = (isset($atts[3])) ? $atts[2] : 300;
 		if ($tag == 'youtube') {
-			$result = tag('object')->attr('style', "height: {$height}px; width: {$height}px")->append(
-					tag('param')->attr('name', 'movie')->attr('value', "http://www.youtube.com/v/{$id}?version=3"),
-					tag('param')->attr('name', 'allowFullScreen')->attr('value', 'true'),
-					tag('param')->attr('name', 'allowScriptAccess')->attr('value', 'always'),
-					tag('embed')->attr(array(
-						'src' => "http://www.youtube.com/v/{$id}?version=3",
-						'type' => 'application/x-shockwave-flash',
-						'allowfullscreen' => 'true',
-						'allowScriptAccess' => 'always',
-						'width' => $width,
-						'height' => $height
-					))
-			);
+//			$result = tag('object')->attr('style', "height: {$height}px; width: {$height}px")->append(
+//					tag('param')->attr('name', 'movie')->attr('value', "http://www.youtube.com/v/{$id}?version=3"),
+//					tag('param')->attr('name', 'allowFullScreen')->attr('value', 'true'),
+//					tag('param')->attr('name', 'allowScriptAccess')->attr('value', 'always'),
+//					tag('embed')->attr(array(
+//						'src' => "http://www.youtube.com/v/{$id}?version=3",
+//						'type' => 'application/x-shockwave-flash',
+//						'allowfullscreen' => 'true',
+//						'allowScriptAccess' => 'always',
+//						'width' => $width,
+//						'height' => $height
+//					))
+//			);
+//			<iframe class="youtube-player" type="text/html" width="640" height="385" src="http://www.youtube.com/embed/VIDEO_ID" frameborder="0">
+			$result = tag('iframe')->attr(array(
+				'class' => 'youtube-player',
+				'type' => 'text/html',
+				'width' => $width,
+				'height' => $height,
+				'frameborder' => 0,
+				'src' => "http://www.youtube.com/embed/{$id}"
+			));
 		} elseif ($tag == 'vimeo') {
 			$result = tag('iframe')->attr(array(
 				'src' => 'http://player.vimeo.com/video/' . $id,
