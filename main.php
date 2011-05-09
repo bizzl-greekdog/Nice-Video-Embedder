@@ -204,10 +204,11 @@ $j(function() {
 	}
 
 	public static function menu_handle() {
-		if ( !empty($_POST['insertonlybutton']) && !empty($_POST['insertonly']['href']) ) {
+		if ( !empty($_POST['insertonlybutton']) ) {
 			$shortcode = '';
 			$matches = array();
 			extract($_POST['insertonly']);
+			error_log("href: $href ; title: $title ; width: $width; height: $height");
 			$dimensions = array('width' => $width, 'height' => $height);
 //			$title = $_POST['insertonly']['title'];
 //			$href = $_POST['insertonly']['href'];

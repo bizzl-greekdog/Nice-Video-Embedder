@@ -68,9 +68,9 @@ if (!function_exists('tag')) {
 				foreach ($this->style as $key => $value) {
 					if (!$value)
 						continue;
-					if (is_int($value))
+					if (intval($value))
 						$value = "{$value}px";
-					elseif (is_float($value))
+					elseif (floatval($value))
 						$value = "{$value}pt";
 					elseif (is_array($value))
 						$value = implode(' ', $value);
