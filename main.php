@@ -60,7 +60,7 @@ class Nice_Video_Embedder {
 		return array_merge($tabs, $newtab);
 	}
 
-	public static function media_process($url, $title, $width = 400, $height = 300) {
+	public static function media_process($url, $title, $width, $height) {
 		wp_enqueue_script('jquery-ui-resizable');
 		media_upload_header();
 		$post_id = intval($_REQUEST['post_id']);
@@ -220,7 +220,7 @@ $j(function() {
 			}
 
 			if (!$shortcode)
-				return wp_iframe(array(__CLASS__, 'media_process'), $href, $title);
+				return wp_iframe(array(__CLASS__, 'media_process'), $href, $title, $width, $height);
 
 			if ($title) {
 				$arguments = array_merge(array('title' => $title, 'content' => $shortcode), $dimensions);
@@ -229,7 +229,7 @@ $j(function() {
 
 			return media_send_to_editor($shortcode);
 		} else {
-			return wp_iframe(array(__CLASS__, 'media_process'), '', '');
+			return wp_iframe(array(__CLASS__, 'media_process'), '', '', 400, 300);
 		}
 	}
 
