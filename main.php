@@ -254,7 +254,7 @@ $j(function() {
 //					))
 //			);
 //			<iframe class="youtube-player" type="text/html" width="640" height="385" src="http://www.youtube.com/embed/VIDEO_ID" frameborder="0">
-			$result = tag('iframe')->attr(array(
+			$result = tag('iframe', true)->attr(array(
 				'class' => 'youtube-player',
 				'type' => 'text/html',
 				'width' => $width,
@@ -263,11 +263,11 @@ $j(function() {
 				'src' => "http://www.youtube.com/embed/{$id}"
 			));
 		} elseif ($tag == 'vimeo') {
-			$result = tag('iframe')->attr(array(
+			$result = tag('iframe', true)->attr(array(
 				'src' => 'http://player.vimeo.com/video/' . $id,
 				'width' => $width,
 				'height' => $height,
-			))->append(' ');
+			));
 		}
 		return strval($result);
 	}

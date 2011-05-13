@@ -2,6 +2,7 @@
 if (!function_exists('tag')) {
 	class Tag {
 		private $name = '';
+		private $forceClose = false;
 		private $attributes = array();
 		private $children = array();
 		private $style = array();
@@ -15,9 +16,10 @@ if (!function_exists('tag')) {
 			}
 		}
 
-		public function __construct($tagName) {
+		public function __construct($tagName, $forceClose = false) {
 	//		parent::__construct();
 			$this->name = $tagName;
+			$this->forceClose = $forceClose;
 		}
 
 		public function attr($name, $value = NULL) {
@@ -81,7 +83,7 @@ if (!function_exists('tag')) {
 				$css = implode('; ', $css);
 				$result .= ' style="' . htmlentities2($css) . '"';
 			}
-			if (count($this->children)) {
+			if (count($this->children) || $this->forceClose) {
 				$result .= '>';
 				foreach ($this->children as $child)
 						$result .= $child;
@@ -92,8 +94,8 @@ if (!function_exists('tag')) {
 		}
 	}
 
-	function tag($tagName) {
-		return new Tag($tagName);
+	function tag($tagName, $forceClose = false) {
+		return new Tag($tagName, $forceClose);
 	}
 }
 ?>
