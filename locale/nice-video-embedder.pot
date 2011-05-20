@@ -1,6 +1,6 @@
-# XXX translation of the Nice Video Embedder.
+# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR Benjamin Kleiner
-# This file is distributed under the same license as the nice-video-embedder package.
+# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nice-video-embedder 2.5.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-05-09 12:35+0200\n"
+"POT-Creation-Date: 2011-05-20 16:28+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,43 +17,59 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/main.php:28 src/main.php:34 src/main.php:59
+#: src/main.php:71
 msgid "From Video Platform"
 msgstr ""
 
-#: src/main.php:42 src/main.php:48 src/main.php:84
+#: src/main.php:96
 msgid "Embed Video from Platform"
 msgstr ""
 
-#: src/main.php:44 src/main.php:50 src/main.php:87
+#: src/main.php:99
 #, php-format
 msgid "<em>%s</em> belongs to no supported video platform"
 msgstr ""
 
-#: src/main.php:51 src/main.php:57 src/main.php:95
+#: src/main.php:107
 msgid "Video URL"
 msgstr ""
 
-#: src/main.php:58 src/main.php:64 src/main.php:114
+#: src/main.php:126
 msgid "Title"
 msgstr ""
 
-#: src/main.php:63 src/main.php:69 src/main.php:132
+#: src/main.php:144
 msgid "Title text, e.g. &#8220;Lucy on YouTube&#8221;"
 msgstr ""
 
-#: src/main.php:137
+#: src/main.php:149
 msgid "Size"
 msgstr ""
 
-#: src/main.php:152
+#: src/main.php:164
 msgid " by "
 msgstr ""
 
-#: src/main.php:161
+#: src/main.php:174
 msgid " Pixels"
 msgstr ""
 
-#: src/main.php:175
+#: src/main.php:180
+msgid "Ratio"
+msgstr ""
+
+#: src/main.php:195
+msgid "4:3"
+msgstr ""
+
+#: src/main.php:204
+msgid "16:9"
+msgstr ""
+
+#: src/main.php:212
+msgid "Custom"
+msgstr ""
+
+#: src/main.php:226
 msgid "Preview"
 msgstr ""

@@ -9,6 +9,9 @@ Author URI:
 License: LGPL3
 */
 
+//if (!defined('CONCATENATE_SCRIPTS'))
+//	define('CONCATENATE_SCRIPTS', false);
+
 if (!function_exists('join_path')) {
 	function join_path() {
 		$fuck = func_get_args();
@@ -34,6 +37,7 @@ class Nice_Video_Embedder {
 		'#youtube\.com/watch\?.*v=(?P<ID>.{11})#i' => '[youtube %ID% %width% %height%]',
 		'#vimeo\.com/(clip:)?(?P<ID>[0-9]+)#i' => '[vimeo %ID% %width% %height%]',
 	);
+	protected static $defaultWidth = 540;
 
 	protected static function init_base() {
 		self::$base = basename(dirname(__FILE__));
@@ -51,6 +55,14 @@ class Nice_Video_Embedder {
 		add_filter('media_upload_tabs', array(__CLASS__, 'media_menu'));
 		add_shortcode('youtube', array(__CLASS__,  'shortcode_handler'));
 		add_shortcode('vimeo', array(__CLASS__,  'shortcode_handler'));
+		add_action('admin_enqueue_scripts', array(__CLASS__, 'init_scripts'));
+	}
+	
+	public static function init_scripts() {
+		wp_register_script('jquery_bizzl_enabling', plugins_url('js/jquery.bizzl.enabling.min.js', __FILE__), array('jquery'), '1.0.0');
+		wp_enqueue_script('jquery_bizzl_enabling');
+//		wp_script_is('jquery_bizzl_enabling') || die('ARGHL');
+//		echo "Oi";
 	}
 
 	public static function media_menu($tabs) {
@@ -61,7 +73,7 @@ class Nice_Video_Embedder {
 	}
 
 	public static function media_process($url, $title, $width, $height) {
-		wp_enqueue_script('jquery-ui-resizable');
+//		wp_enqueue_script('jquery-ui-resizable');
 		media_upload_header();
 		$post_id = intval($_REQUEST['post_id']);
 
@@ -156,9 +168,48 @@ class Nice_Video_Embedder {
 										'value' => $height,
 										'style' => 'width: auto',
 										'type' => 'text',
-										'aria-required' => 'true'
+										'aria-required' => 'true',
+										'disabled' => 'disabled'
 									)),
 									__(' Pixels', self::$domain)
+							)
+						),
+						tag('tr')->append(
+							tag('th')->attr(array('valign' => 'top', 'scope' => 'row', 'class' => 'label'))->append(
+								tag('span')->attr('class', 'alignleft')->append(
+									tag('label')->attr('for', 'ratio')->append(__('Ratio', self::$domain))
+								),
+								tag('span')->attr('class', 'alignright')->append(
+									tag('abbr')->attr(array('title' => 'required', 'class' => 'required'))->append('')
+								)
+							),
+							tag('td')->attr('class', 'field')->append(
+									tag('input')->attr(array(
+//										'id' => 'insertonly-43',
+										'name' => 'ratio',
+										'checked' => 'checked',
+										'type' => 'radio',
+										'aria-required' => 'true',
+										'value' => '/ 4 * 3'
+									)),
+									tag('span')->attr('class', 'radio-label')->append(__('4:3', self::$domain)),
+									tag('span')->css(array('display' => 'inline-block', 'width' => 50))->append(' '),
+									tag('input')->attr(array(
+//										'id' => 'insertonly-169',
+										'name' => 'ratio',
+										'type' => 'radio',
+										'aria-required' => 'true',
+										'value' => '/ 16 * 9'
+									)),
+									tag('span')->attr('class', 'radio-label')->append(__('16:9', self::$domain)),
+									tag('span')->css(array('display' => 'inline-block', 'width' => 50))->append(' '),
+									tag('input')->attr(array(
+										'id' => 'custom-ratio',
+										'name' => 'ratio',
+										'type' => 'radio',
+										'aria-required' => 'true'
+									)),
+									tag('span')->attr('class', 'radio-label')->append(__('Custom', self::$domain))
 							)
 						),
 						tag('tr')->append(
@@ -183,18 +234,39 @@ class Nice_Video_Embedder {
 		
 		$form->append(tag('script')->attr('type', 'text/javascript')->append(
 			"//<!--\n",
-'var $j = jQuery.noConflict();
-$j(function() {
-	$j("#insertonly-height, #insertonly-width").keyup(function(event) {
-		var h = parseInt($j("#insertonly-height").attr("value"));
-		var w = parseInt($j("#insertonly-width").attr("value"));
-		$j("#video-size-preview").height(h);
-		$j("#video-size-preview").width(w);
+'
+jQuery.noConflict()(function($) {
+	function updateHeight() {
+		var h = parseInt($("#insertonly-height").val());
+		var r = $("input[type=radio]:checked");
+		if (r.attr("id") != "custom-ratio") {
+			h = Math.round(eval($("#insertonly-width").val() + r.val()));
+			$("#insertonly-height").val(h);
+		}
+		return h;
+	}
+	$("#insertonly-height, #insertonly-width").keyup(function(event) {
+		var h = updateHeight();
+		var w = parseInt($("#insertonly-width").val());
+		$("#video-size-preview").height(h);
+		$("#video-size-preview").width(w);
 	});
-	$j("#fromvideoplatform-form").submit(function(event) {
-		$j("#insertonly-height").attr("value", $j("#video-size-preview").height());
-		$j("#insertonly-width").attr("value", $j("#video-size-preview").width());
+	$("#fromvideoplatform-form").submit(function(event) {
+		$("#insertonly-height").attr("value", $("#video-size-preview").height());
+		$("#insertonly-width").attr("value", $("#video-size-preview").width());
 		return true;
+	});
+	$("#fromvideoplatform-form input[type=radio]").click(function(e) {
+		$("#insertonly-height").enabled($("#custom-ratio:checked").length);
+		$("#insertonly-height, #insertonly-width").keyup();
+	});
+	$("#fromvideoplatform-form .radio-label").click(function(e) {
+		$(this).prev("input").attr("checked", true).click();
+	}).css({
+		 MozUserSelect: "none",
+		 KhtmlUserSelect: "none",
+		 WebkitUserSelect: "none",
+		 userSelect: "none"
 	});
 });',
 			"\n//-->"
@@ -230,15 +302,15 @@ $j(function() {
 
 			return media_send_to_editor($shortcode);
 		} else {
-			return wp_iframe(array(__CLASS__, 'media_process'), '', '', 400, 300);
+			return wp_iframe(array(__CLASS__, 'media_process'), '', '', self::$defaultWidth, self::$defaultWidth / 4 * 3);
 		}
 	}
 
 	public static function shortcode_handler($atts, $content, $tag) {
 		$result = '';
 		$id = (isset($atts[1])) ? $atts[0] : '';
-		$width = (isset($atts[2])) ? $atts[1] : 400;
-		$height = (isset($atts[3])) ? $atts[2] : 300;
+		$width = (isset($atts[2])) ? $atts[1] : self::$defaultWidth;
+		$height = (isset($atts[3])) ? $atts[2] : self::$defaultWidth / 4 * 3;
 		if ($tag == 'youtube') {
 //			$result = tag('object')->attr('style', "height: {$height}px; width: {$height}px")->append(
 //					tag('param')->attr('name', 'movie')->attr('value', "http://www.youtube.com/v/{$id}?version=3"),
