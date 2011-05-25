@@ -252,7 +252,7 @@ jQuery.noConflict()(function($) {
 		$("#video-size-preview").width(w);
 	});
 	$("#fromvideoplatform-form").submit(function(event) {
-		$("#insertonly-height").attr("value", $("#video-size-preview").height());
+		$("#insertonly-height").attr("value", $("#video-size-preview").height()).removeAttr("disabled");
 		$("#insertonly-width").attr("value", $("#video-size-preview").width());
 		return true;
 	});
@@ -308,9 +308,9 @@ jQuery.noConflict()(function($) {
 
 	public static function shortcode_handler($atts, $content, $tag) {
 		$result = '';
-		$id = (isset($atts[1])) ? $atts[0] : '';
-		$width = (isset($atts[2])) ? $atts[1] : self::$defaultWidth;
-		$height = (isset($atts[3])) ? $atts[2] : self::$defaultWidth / 4 * 3;
+		$id = (isset($atts[0])) ? $atts[0] : '';
+		$width = (isset($atts[1])) ? $atts[1] : self::$defaultWidth;
+		$height = (isset($atts[2])) ? $atts[2] : self::$defaultWidth / 4 * 3;
 		if ($tag == 'youtube') {
 //			$result = tag('object')->attr('style', "height: {$height}px; width: {$height}px")->append(
 //					tag('param')->attr('name', 'movie')->attr('value', "http://www.youtube.com/v/{$id}?version=3"),
