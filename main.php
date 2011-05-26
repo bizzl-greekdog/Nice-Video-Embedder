@@ -327,7 +327,7 @@ jQuery.noConflict()(function($) {
 //			);
 //			<iframe class="youtube-player" type="text/html" width="640" height="385" src="http://www.youtube.com/embed/VIDEO_ID" frameborder="0">
 			$result = tag('iframe', true)->attr(array(
-				'class' => 'youtube-player',
+				'class' => 'youtube nve-video',
 				'type' => 'text/html',
 				'width' => $width,
 				'height' => $height,
@@ -336,6 +336,7 @@ jQuery.noConflict()(function($) {
 			));
 		} elseif ($tag == 'vimeo') {
 			$result = tag('iframe', true)->attr(array(
+				'class' => 'vimeo nve-video',
 				'src' => 'http://player.vimeo.com/video/' . $id,
 				'width' => $width,
 				'height' => $height,
