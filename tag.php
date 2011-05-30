@@ -90,48 +90,50 @@ if (!function_exists('tag')) {
 			return $this;
 		}
 
-		public function append($child) {
+		public function append($elements) {
 			if (func_num_args () > 1)
-				$child = func_get_args();
-			if (is_array($child))
-				$this->children = array_merge($this->children, $child);
+				$elements = func_get_args();
+			if (is_array($elements))
+				$this->children = array_merge($this->children, $elements);
 			else
-				array_push($this->children, $child);
+				array_push($this->children, $elements);
 			return $this;
 		}
 
 		public function __toString() {
-			$result = '<' . $this->name;
-			foreach ($this->attributes as $key => $value)
-					$result .= ' ' . $key . '="' . htmlentities2($value) . '"';
-			if (count($this->style)) {
-				$css = array();
-				foreach ($this->style as $key => $value) {
-					if (!$value)
-						continue;
-					if (intval($value))
-						$value = "{$value}px";
-					elseif (floatval($value))
-						$value = "{$value}pt";
-					elseif (is_array($value))
-						$value = implode(' ', $value);
-					else
-						$value = strval($value);
-					array_push($css, "{$key}: {$value}");
+			if ($this->name) {
+				$result = '<' . $this->name;
+				foreach ($this->attributes as $key => $value)
+						$result .= ' ' . $key . '="' . htmlentities2($value) . '"';
+				if (count($this->style)) {
+					$css = array();
+					foreach ($this->style as $key => $value) {
+						if (!$value)
+							continue;
+						if (intval($value))
+							$value = "{$value}px";
+						elseif (floatval($value))
+							$value = "{$value}pt";
+						elseif (is_array($value))
+							$value = implode(' ', $value);
+						else
+							$value = strval($value);
+						array_push($css, "{$key}: {$value}");
+					}
+					$css = implode('; ', $css);
+					$result .= ' style="' . htmlentities2($css) . '"';
 				}
-				$css = implode('; ', $css);
-				$result .= ' style="' . htmlentities2($css) . '"';
-			}
-			if (count($this->classes)) {
-				$result .= ' class="' . htmlentities2(implode(' ', $this->classes)) . '"';
+				if (count($this->classes)) {
+					$result .= ' class="' . htmlentities2(implode(' ', $this->classes)) . '"';
+				}
 			}
 			if (count($this->children) || $this->forceClose) {
-				$result .= '>';
+				$result .= $this->name ? '>' : '';
 				foreach ($this->children as $child)
 						$result .= $child;
-				$result .= "</{$this->name}>";
+				$result .= $this->name ? "</{$this->name}>" : '';
 			} else
-				$result .= ' />';
+				$result .= $this->name ? ' />' : '';
 			return $result;
 		}
 	}
@@ -140,31 +142,85 @@ if (!function_exists('tag')) {
 		return new Tag($tagName, $forceClose);
 	}
 	
+	function group() {
+		$elements = func_get_args();
+		return tag('')->append($elements);
+	}
+	
 	function br() {
-		return new Tag('br', false);
+		return tag('br', false);
 	}
 	
 	function hr() {
-		return new Tag('hr', false);
+		return tag('hr', false);
 	}
 	
 	function div() {
-		return new Tag('div', true);
+		$elements = func_get_args();
+		return tag('div', true)->append($elements);
 	}
 	
-	function span() {
-		return new Tag('span', true);
+	function p($text) {
+		$p = tag('p', true);
+		return $p->append($text);
 	}
 	
-	function iframe() {
-		return new Tag('iframe', true);
+	function span($text) {
+		$span = tag('span', true);
+		return $span->append($text);
 	}
 	
-	function script($src = null) {
-		$m = new Tag('script', true);
+	function h($text, $size = 1) {
+		$span = tag('h' . $size, true);
+		return $span->append($text);
+	}
+	
+	function iframe($src, $noframe = null) {
+		if (!$noframe)
+			$noframe = __('This feature requires inline frames. You have iframes disabled or your browser does not support them.');
+		$iframe = tag('iframe', true);
+		return $iframe->attr('src', $src)->append($noframe);
+	}
+	
+	function script($parameters) {
+		extract(array_merge(array(
+			'src' => null,
+			'type' => 'text/javascript',
+			'code' => null,
+		), $parameters));
+		$m = tag('script', true);
 		if ($src)
-			$m->attr('src', $src);
-		return $m->attr('type', 'text/javascript');
+			$m->attr('src', $code);
+		if ($code)
+			$m->append("//<!--\n", $code, "\n//-->");
+		return $m->attr('type', $type);
+	}
+	
+	function pre() {
+		$pre = tag('pre');
+		$elements = func_get_args();
+		foreach($elements as $element)
+			$pre->append("\n", htmlentities2(print_r($element, true)));
+		return $pre;
+	}
+	
+	function label($for, $text) {
+		return tag('label')->attr('for', $for)->append($text);
+	}
+	
+	function checkbox($name, $id, $checked = false, $text = false, $value = false) {
+		$cb = tag('input')->attr(array(
+			'type' => 'checkbox',
+			'id' => $id,
+			'name' => $name
+		));
+		if ($checked)
+			$cb->attr('checked', 'checked');
+		if ($value)
+			$cb->attr('value', $value);
+		if ($text)
+			$cb = group($cb, label($id, $text), br());
+		return $cb;
 	}
 }
 ?>
