@@ -240,7 +240,7 @@ jQuery.noConflict()(function($) {
 		var h = parseInt($("#insertonly-height").val());
 		var r = $("input[type=radio]:checked");
 		if (r.attr("id") != "custom-ratio") {
-			h = Math.round(eval($("#insertonly-width").val() + r.val()));
+			h = Math.floor(eval($("#insertonly-width").val() + r.val()));
 			$("#insertonly-height").val(h);
 		}
 		return h;
