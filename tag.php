@@ -5,7 +5,7 @@ if (!function_exists('tag')) {
 		private $name = '';
 		private $forceClose = false;
 		private $attributes = array();
-		private $children = array();
+		protected $children = array();
 		private $style = array();
 		private $classes = array();
 		
@@ -137,14 +137,59 @@ if (!function_exists('tag')) {
 			return $result;
 		}
 	}
+	
+	class TagGroup extends Tag {
+		
+		public function __construct() {
+			parent::__construct('');
+		}
+		
+		private function apply($method, $args) {
+			foreach ($this->children as $child)
+				call_user_method($method, $child, $args);
+		}
+		
+		public function addClass($classes) {
+			$args = func_get_args();
+			$this->apply('addClass', $args);
+			return $this;
+		}
+		
+		public function removeClass($classes) {
+			$args = func_get_args();
+			$this->apply('removeClass', $args);
+			return $this;
+		}
+		
+//		public function append($elements) {
+//			$args = func_get_args();
+//			$this->apply('addClass', $args);
+//		}
+		
+		public function attr($name, $value = NULL) {
+			$args = func_get_args();
+			$this->apply('attr', $args);
+			return $this;
+		}
+		
+		public function css($name, $value = NULL) {
+			$args = func_get_args();
+			$this->apply('css', $args);
+			return $this;
+		}
+		
+	}
 
+	// TODO Move this to __invoke?
 	function tag($tagName, $forceClose = false) {
 		return new Tag($tagName, $forceClose);
 	}
 	
+	// TODO Move this to __invoke?
 	function group() {
 		$elements = func_get_args();
-		return tag('')->append($elements);
+		$g = new TagGroup();
+		return $g->append($elements);
 	}
 	
 	function br() {
@@ -157,7 +202,8 @@ if (!function_exists('tag')) {
 	
 	function div() {
 		$elements = func_get_args();
-		return tag('div', true)->append($elements);
+		$div = tag('div', true);
+		return call_user_func_array(array(&$div, 'append'), $elements);
 	}
 	
 	function p($text) {
