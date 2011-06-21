@@ -90,7 +90,7 @@ if (!function_exists('tag')) {
 			return $this;
 		}
 
-		public function append($elements) {
+		public function append($elements = array()) {
 			if (func_num_args () > 1)
 				$elements = func_get_args();
 			if (is_array($elements))
@@ -267,6 +267,13 @@ if (!function_exists('tag')) {
 		if ($text)
 			$cb = group($cb, label($id, $text), br());
 		return $cb;
+	}
+	
+	function img($src, $alt = '') {
+		return tag('img')->attr(array(
+			'src' => $src,
+			'alt' => $alt
+		));
 	}
 }
 ?>
