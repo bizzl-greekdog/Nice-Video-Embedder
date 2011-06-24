@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('tag')) {
+//if (!function_exists('tag')) {
 	class Tag {
 		private $name = '';
 		private $forceClose = false;
@@ -236,7 +236,7 @@ if (!function_exists('tag')) {
 		), $parameters));
 		$m = tag('script', true);
 		if ($src)
-			$m->attr('src', $code);
+			$m->attr('src', $src);
 		if ($code)
 			$m->append("//<!--\n", $code, "\n//-->");
 		return $m->attr('type', $type);
@@ -275,5 +275,3 @@ if (!function_exists('tag')) {
 			'alt' => $alt
 		));
 	}
-}
-?>
