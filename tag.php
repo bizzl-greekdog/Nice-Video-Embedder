@@ -1,6 +1,6 @@
 <?php
 
-//if (!function_exists('tag')) {
+if (!function_exists('tag')) {
 	class Tag {
 		private $name = '';
 		private $forceClose = false;
@@ -275,3 +275,4 @@
 			'alt' => $alt
 		));
 	}
+}
