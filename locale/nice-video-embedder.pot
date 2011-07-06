@@ -67,9 +67,22 @@ msgid "16:9"
 msgstr ""
 
 #: src/main.php:212
-msgid "Custom"
+msgid "Custom Ratio"
 msgstr ""
 
 #: src/main.php:226
 msgid "Preview"
+msgstr ""
+
+#: src/main.php:226
+msgid "Open"
+msgstr ""
+
+msgid "Nice Video Embedder"
+msgstr ""
+
+msgid "Default Size"
+msgstr ""
+
+msgid "Width"
 msgstr ""

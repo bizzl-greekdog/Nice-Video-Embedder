@@ -3,20 +3,23 @@
 Plugin Name: Nice Video Embedder
 Plugin URI: 
 Description: Adds a tab to the upload dialog and some shortcodes to make the embedding of videos easier.
-Version: 2.5.0
+Version: 2.6.0
 Author: Benjamin Kleiner <bizzl@users.sourceforge.net>
 Author URI: 
 License: LGPL3
 */
 
-//if (!defined('CONCATENATE_SCRIPTS'))
-//	define('CONCATENATE_SCRIPTS', false);
-
 if (!function_exists('join_path')) {
+
 	function join_path() {
 		$fuck = func_get_args();
-		return implode(DIRECTORY_SEPARATOR, $fuck);
+		for ($i = 0; $i < count($fuck); $i++)
+			if (is_array($fuck[$i]))
+				array_splice($fuck, $i, 1, $fuck[$i]);
+		$f = implode(DIRECTORY_SEPARATOR, $fuck);
+		return preg_replace('/(?<!:)\\' . DIRECTORY_SEPARATOR . '+/', DIRECTORY_SEPARATOR, $f);
 	}
+
 }
 
 if (!function_exists('nsprintf')) {
@@ -51,18 +54,70 @@ class Nice_Video_Embedder {
 	public static function init() {
 		self::init_base();
 		self::init_l10n();
+		self::$defaultWidth = get_option("bizzl_nve_default_width", self::$defaultWidth);
+		add_action('admin_init', array(__CLASS__, 'admin_init'));
 		add_action('media_upload_fromvideoplatform', array(__CLASS__, 'menu_handle'));
 		add_filter('media_upload_tabs', array(__CLASS__, 'media_menu'));
 		add_shortcode('youtube', array(__CLASS__,  'shortcode_handler'));
 		add_shortcode('vimeo', array(__CLASS__,  'shortcode_handler'));
 		add_action('admin_enqueue_scripts', array(__CLASS__, 'init_scripts'));
+		add_filter('query_vars', array(__CLASS__, 'query_vars'));
+		add_action('parse_request',array(__CLASS__, 'do_preview'));
+	}
+	
+	public static function admin_init() {
+		add_settings_section('bizzl_nve', __('Nice Video Embedder', self::$domain), array(__CLASS__, 'settings_section'), 'media');
+		add_settings_field('bizzl_nve_default_width', __('Default Size', self::$domain), array(__CLASS__, 'default_width_setting'), 'media', 'bizzl_nve');
+		register_setting('media', 'bizzl_nve_default_width', 'intval');
+	}
+	
+	public static function default_width_setting() {
+		$g = new TagGroup();
+		$g->append(label('bizzl_nve_default_width', __('Width', self::$domain)), "\n", tag('input')->attr(array(
+			'type' => 'text',
+			'value' => get_option("bizzl_nve_default_width", self::$defaultWidth),
+			'id' => 'bizzl_nve_default_width',
+			'name' => 'bizzl_nve_default_width'
+		))->addClass('small-text'));
+		echo $g;
+	}
+	
+	public static function query_vars($v) {
+		$v[] = 'nve-preview';	
+		return $v;
+	}
+	
+	public static function do_preview(&$wp) {
+	    if (array_key_exists('nve-preview', $wp->query_vars)) {
+	    	add_filter('the_content', array(__CLASS__, 'inject_preview'));
+	    	add_filter('template_include', 'get_single_template');
+	        require_once(ABSPATH . WPINC . '/template-loader.php');
+	        exit();
+	    }
+    	return;
+	}
+	
+	function inject_preview() {
+		global $wp;
+		list($href, $width, $height, $title) = explode('|', $wp->query_vars['nve-preview'], 4);
+		$dimensions  = array('width' => $width, 'height' => $height);
+		foreach (self::$rules as $key => $value) {
+			if (preg_match($key, $href, &$matches) > 0) {
+				$shortcode = nsprintf($value, array_merge($matches, $dimensions));
+				break;
+			}
+		}
+		if ($title) {
+			$arguments = array_merge(array('title' => $title, 'content' => $shortcode), $dimensions);
+			$shortcode = nsprintf('[caption id="%title%" width="%width%" caption="%title%"]%content%[/caption]', $arguments);
+		}
+		//echo pre($shortcode);
+		echo do_shortcode($shortcode);
 	}
 	
 	public static function init_scripts() {
 		wp_register_script('jquery_bizzl_enabling', plugins_url('js/jquery.bizzl.enabling.min.js', __FILE__), array('jquery'), '1.0.0');
 		wp_enqueue_script('jquery_bizzl_enabling');
-//		wp_script_is('jquery_bizzl_enabling') || die('ARGHL');
-//		echo "Oi";
 	}
 
 	public static function media_menu($tabs) {
@@ -73,7 +128,6 @@ class Nice_Video_Embedder {
 	}
 
 	public static function media_process($url, $title, $width, $height) {
-//		wp_enqueue_script('jquery-ui-resizable');
 		media_upload_header();
 		$post_id = intval($_REQUEST['post_id']);
 
@@ -104,7 +158,7 @@ class Nice_Video_Embedder {
 						tag('tr')->append(
 							tag('th')->attr(array('valign' => 'top', 'scope' => 'row', 'class' => 'label'))->append(
 								tag('span')->attr('class', 'alignleft')->append(
-									tag('label')->attr('for', 'insertonly[href]')->append(__('Video URL', self::$domain))
+									tag('label')->attr('for', 'insertonly-href')->append(__('Video URL', self::$domain))
 								),
 								tag('span')->attr('class', 'alignright')->append(
 									tag('abbr')->attr(array('title' => 'required', 'class' => 'required'))->append('*')
@@ -112,7 +166,7 @@ class Nice_Video_Embedder {
 							),
 							tag('td')->attr('class', 'field')->append(
 									tag('input')->attr(array(
-										'id' => 'insertonly[href]',
+										'id' => 'insertonly-href',
 										'name' => 'insertonly[href]',
 										'value' => $url,
 										'type' => 'text',
@@ -123,7 +177,7 @@ class Nice_Video_Embedder {
 						tag('tr')->append(
 							tag('th')->attr(array('valign' => 'top', 'scope' => 'row', 'class' => 'label'))->append(
 								tag('span')->attr('class', 'alignleft')->append(
-									tag('label')->attr('for', 'insertonly[title]')->append(__('Title', self::$domain))
+									tag('label')->attr('for', 'insertonly-title')->append(__('Title', self::$domain))
 								),
 								tag('span')->attr('class', 'alignright')->append(
 									tag('abbr')->attr(array('title' => 'required', 'class' => 'required'))->append('')
@@ -131,7 +185,7 @@ class Nice_Video_Embedder {
 							),
 							tag('td')->attr('class', 'field')->append(
 									tag('input')->attr(array(
-										'id' => 'insertonly[title]',
+										'id' => 'insertonly-title',
 										'name' => 'insertonly[title]',
 										'value' => $title,
 										'type' => 'text',
@@ -146,7 +200,7 @@ class Nice_Video_Embedder {
 						tag('tr')->append(
 							tag('th')->attr(array('valign' => 'top', 'scope' => 'row', 'class' => 'label'))->append(
 								tag('span')->attr('class', 'alignleft')->append(
-									tag('label')->attr('for', 'insertonly[width]')->append(__('Size', self::$domain))
+									tag('label')->attr('for', 'insertonly-width')->append(__('Size', self::$domain))
 								),
 								tag('span')->attr('class', 'alignright')->append(
 									tag('abbr')->attr(array('title' => 'required', 'class' => 'required'))->append('*')
@@ -185,9 +239,16 @@ class Nice_Video_Embedder {
 							),
 							tag('td')->attr('class', 'field')->append(
 									tag('input')->attr(array(
-//										'id' => 'insertonly-43',
 										'name' => 'ratio',
+										'type' => 'radio',
+										'aria-required' => 'true',
 										'checked' => 'checked',
+										'value' => '/ 16 * 9'
+									)),
+									tag('span')->attr('class', 'radio-label')->append(__('16:9', self::$domain)),
+									tag('span')->css(array('display' => 'inline-block', 'width' => 50))->append(' '),
+									tag('input')->attr(array(
+										'name' => 'ratio',
 										'type' => 'radio',
 										'aria-required' => 'true',
 										'value' => '/ 4 * 3'
@@ -195,35 +256,28 @@ class Nice_Video_Embedder {
 									tag('span')->attr('class', 'radio-label')->append(__('4:3', self::$domain)),
 									tag('span')->css(array('display' => 'inline-block', 'width' => 50))->append(' '),
 									tag('input')->attr(array(
-//										'id' => 'insertonly-169',
-										'name' => 'ratio',
-										'type' => 'radio',
-										'aria-required' => 'true',
-										'value' => '/ 16 * 9'
-									)),
-									tag('span')->attr('class', 'radio-label')->append(__('16:9', self::$domain)),
-									tag('span')->css(array('display' => 'inline-block', 'width' => 50))->append(' '),
-									tag('input')->attr(array(
 										'id' => 'custom-ratio',
 										'name' => 'ratio',
 										'type' => 'radio',
 										'aria-required' => 'true'
 									)),
-									tag('span')->attr('class', 'radio-label')->append(__('Custom', self::$domain))
+									tag('span')->attr('class', 'radio-label')->append(__('Custom Ratio', self::$domain))
 							)
 						),
-						tag('tr')->append(
-							tag('td')->attr('colspan', 2)->append(
-								tag('div')->attr(array(
-									'class' => 'error',
-									'id' => 'video-size-preview'
-								))->css(array(
-									'width' => $width,
-									'height' => $height,
-									'margin' => '0 auto',
-									'text-align' => 'center',
-									'overflow' => 'hidden'
-								))->append(tag('span')->css('vertical-align', 'middle')->append(__('Preview', self::$domain)))
+						tag('tr')->css('display', 'none')->attr("id", "video-size-preview")->append(
+							tag('th')->attr(array('valign' => 'top', 'scope' => 'row', 'class' => 'label'))->append(
+								tag('span')->attr('class', 'alignleft')->append(
+									tag('label')->attr('for', 'ratio')->append(__('Preview', self::$domain))
+								),
+								tag('span')->attr('class', 'alignright')->append(
+									tag('abbr')->attr(array('title' => 'required', 'class' => 'required'))->append('')
+								)
+							),
+							tag('td')->append(
+								tag('a')->attr(array(
+									'target' => '_blank',
+									'data-base' => home_url() . '?nve-preview='
+								))->append(__('Open', self::$domain))
 							)
 						)
 					)
@@ -245,15 +299,20 @@ jQuery.noConflict()(function($) {
 		}
 		return h;
 	}
-	$("#insertonly-height, #insertonly-width").keyup(function(event) {
+	$("input[type=text]").bind("change keyup focus", function(event) {
 		var h = updateHeight();
-		var w = parseInt($("#insertonly-width").val());
-		$("#video-size-preview").height(h);
-		$("#video-size-preview").width(w);
+		var w = $("#insertonly-width").val();
+		var v = $("#insertonly-href").val();
+		var t = $("#insertonly-title").val();
+		var base = $("#video-size-preview a").attr("data-base");
+		if (v) {
+			$("#video-size-preview a").attr("href", base + v + "|" + w + "|" + h + "|" + t);
+			$("#video-size-preview").show();
+		} else
+			$("#video-size-preview").hide();
 	});
 	$("#fromvideoplatform-form").submit(function(event) {
-		$("#insertonly-height").attr("value", $("#video-size-preview").height()).removeAttr("disabled");
-		$("#insertonly-width").attr("value", $("#video-size-preview").width());
+		$("#insertonly-height").removeAttr("disabled");
 		return true;
 	});
 	$("#fromvideoplatform-form input[type=radio]").click(function(e) {
@@ -280,10 +339,7 @@ jQuery.noConflict()(function($) {
 			$shortcode = '';
 			$matches = array();
 			extract($_POST['insertonly']);
-			error_log("href: $href ; title: $title ; width: $width; height: $height");
 			$dimensions = array('width' => $width, 'height' => $height);
-//			$title = $_POST['insertonly']['title'];
-//			$href = $_POST['insertonly']['href'];
 
 			foreach (self::$rules as $key => $value) {
 				if (preg_match($key, $href, &$matches) > 0) {
@@ -302,7 +358,7 @@ jQuery.noConflict()(function($) {
 
 			return media_send_to_editor($shortcode);
 		} else {
-			return wp_iframe(array(__CLASS__, 'media_process'), '', '', self::$defaultWidth, self::$defaultWidth / 4 * 3);
+			return wp_iframe(array(__CLASS__, 'media_process'), '', '', self::$defaultWidth, floor(self::$defaultWidth / 16 * 9));
 		}
 	}
 
@@ -312,20 +368,6 @@ jQuery.noConflict()(function($) {
 		$width = (isset($atts[1])) ? $atts[1] : self::$defaultWidth;
 		$height = (isset($atts[2])) ? $atts[2] : self::$defaultWidth / 4 * 3;
 		if ($tag == 'youtube') {
-//			$result = tag('object')->attr('style', "height: {$height}px; width: {$height}px")->append(
-//					tag('param')->attr('name', 'movie')->attr('value', "http://www.youtube.com/v/{$id}?version=3"),
-//					tag('param')->attr('name', 'allowFullScreen')->attr('value', 'true'),
-//					tag('param')->attr('name', 'allowScriptAccess')->attr('value', 'always'),
-//					tag('embed')->attr(array(
-//						'src' => "http://www.youtube.com/v/{$id}?version=3",
-//						'type' => 'application/x-shockwave-flash',
-//						'allowfullscreen' => 'true',
-//						'allowScriptAccess' => 'always',
-//						'width' => $width,
-//						'height' => $height
-//					))
-//			);
-//			<iframe class="youtube-player" type="text/html" width="640" height="385" src="http://www.youtube.com/embed/VIDEO_ID" frameborder="0">
 			$result = tag('iframe', true)->attr(array(
 				'class' => 'youtube nve-video',
 				'type' => 'text/html',
@@ -333,11 +375,17 @@ jQuery.noConflict()(function($) {
 				'height' => $height,
 				'frameborder' => 0,
 				'src' => "http://www.youtube.com/embed/{$id}"
+			))->css(array(
+				'width' => $width,
+				'height' => $height,
 			));
 		} elseif ($tag == 'vimeo') {
 			$result = tag('iframe', true)->attr(array(
 				'class' => 'vimeo nve-video',
 				'src' => 'http://player.vimeo.com/video/' . $id,
+				'width' => $width,
+				'height' => $height,
+			))->css(array(
 				'width' => $width,
 				'height' => $height,
 			));
