@@ -188,6 +188,7 @@ if (!function_exists('tag')) {
 			$args = func_get_args();
 			parent::append($args);
 			$this->apply('addClass', $this->classes);
+			return $this;
 		}
 
 		public function attr($name, $value = NULL) {
