@@ -1,12 +1,30 @@
 <?php
 /*
-Plugin Name: Nice Video Embedder
-Plugin URI: 
-Description: Adds a tab to the upload dialog and some shortcodes to make the embedding of videos easier.
-Version: 2.6.0
-Author: Benjamin Kleiner <bizzl@users.sourceforge.net>
-Author URI: 
-License: LGPL3
+Plugin Name:	Nice Video Embedder
+Plugin URI:		https://github.com/bizzl-greekdog/Nice-Video-Embedder
+Description:	Adds a tab to the upload dialog and some shortcodes to make the embedding of videos from certain platforms easier.
+Version:		2.6.0
+Author:			Benjamin Kleiner
+Author URI:		https://github.com/bizzl-greekdog
+License:		LGPL3
+*/
+/*
+    Copyright (c) 2011 Benjamin Kleiner <bizzl@users.sourceforge.net>
+ 
+    This file is part of Nice Video Embedder.
+
+    Nice Video Embedder is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Nice Video Embedder is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with Nice Video Embedder. If not, see <http://www.gnu.org/licenses/>.
 */
 
 if (!function_exists('join_path')) {
