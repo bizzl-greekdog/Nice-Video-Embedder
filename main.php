@@ -29,12 +29,14 @@ License:		LGPL3
 
 if (!function_exists('join_path')) {
 
+	// This is an implementation of pythons sys.path.join()
+	// As the name suggest, join_path takes all arguments and joins
+	// them using the directory separator.
 	function join_path() {
 		$fuck = func_get_args();
-		for ($i = 0; $i < count($fuck); $i++)
-			if (is_array($fuck[$i]))
-				array_splice($fuck, $i, 1, $fuck[$i]);
-		$f = implode(DIRECTORY_SEPARATOR, $fuck);
+		$flat = (object)array('flat' => array());
+		array_walk_recursive($fuck, create_function('&$v, $k, &$t', '$t->flat[] = $v;'), $flat);
+		$f = implode(DIRECTORY_SEPARATOR, $flat->flat);
 		return preg_replace('/(?<!:)\\' . DIRECTORY_SEPARATOR . '+/', DIRECTORY_SEPARATOR, $f);
 	}
 
